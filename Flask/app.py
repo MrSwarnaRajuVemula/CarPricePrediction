@@ -27,38 +27,54 @@ class CarPricePredictor:
 
     def load_models(self):
         try:
-            # Load regression models
-            print("Loading models from models/ directory...")
+            # Get the absolute path to the models directory
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+            models_dir = os.path.join(base_dir, 'models')
 
-            with open('models/Lasso.pkl', 'rb') as f:
-                self.models['lasso'] = pickle.load(f)
-            print("✓ Lasso model loaded successfully!")
+            print(f"📁 Looking for models in: {models_dir}")
 
-            with open('models/LinearRegression.pkl', 'rb') as f:
-                self.models['linear'] = pickle.load(f)
-            print("✓ Linear Regression model loaded successfully!")
+            # Check if models directory exists
+            if not os.path.exists(models_dir):
+                print(f"❌ Models directory not found: {models_dir}")
+                # List current directory contents for debugging
+                current_dir = os.listdir(base_dir)
+                print(f"📂 Current directory contents: {current_dir}")
+                raise FileNotFoundError("Models directory not found")
 
-            with open('models/Ridge.pkl', 'rb') as f:
-                self.models['ridge'] = pickle.load(f)
-            print("✓ Ridge model loaded successfully!")
+            # List files in models directory
+            model_files = os.listdir(models_dir)
+            print(f"📄 Files in models directory: {model_files}")
 
-            with open('models/LogisticRegression.pkl', 'rb') as f:
-                self.models['logistic'] = pickle.load(f)
-            print("✓ Logistic Regression model loaded successfully!")
+            # Load regression models with absolute paths
+            model_paths = {
+                'lasso': os.path.join(models_dir, 'Lasso.pkl'),
+                'linear': os.path.join(models_dir, 'LinearRegression.pkl'),
+                'ridge': os.path.join(models_dir, 'Ridge.pkl'),
+                'logistic': os.path.join(models_dir, 'LogisticRegression.pkl')
+            }
 
-            print("All models loaded successfully!")
+            for model_name, model_path in model_paths.items():
+                if os.path.exists(model_path):
+                    with open(model_path, 'rb') as f:
+                        self.models[model_name] = pickle.load(f)
+                    print(f"✓ {model_name} model loaded successfully!")
+                else:
+                    print(f"❌ Model file not found: {model_path}")
+                    raise FileNotFoundError(f"Model file not found: {model_path}")
+
+            print("🎉 All models loaded successfully!")
 
         except Exception as e:
-            print(f"Error loading models: {e}")
+            print(f"❌ Error loading models: {e}")
             print(traceback.format_exc())
-            # Fallback to mock models if loading fails
+            # Fallback to mock models
             self.models = {
                 'lasso': self.lasso_predict,
                 'linear': self.linear_predict,
                 'ridge': self.ridge_predict,
                 'logistic': self.logistic_predict
             }
-            print("Using mock models as fallback")
+            print("⚠️ Using mock models as fallback")
 
     def lasso_predict(self, features):
         # Mock prediction fallback
