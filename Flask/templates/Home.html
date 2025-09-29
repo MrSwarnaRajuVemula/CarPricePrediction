@@ -2,9 +2,1499 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swarna Raju V | Car Price Prediction</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --pure-white: #ffffff;
+            --white: #f8f9fa;
+            --light-gray: #e9ecef;
+            --gray: #adb5bd;
+            --dark-gray: #495057;
+            --darker-gray: #343a40;
+            --black: #212529;
+            --pure-black: #000000;
+            --accent: #404040;
+
+            --card-bg: var(--pure-white);
+            --text-primary: var(--pure-black);
+            --text-secondary: var(--darker-gray);
+            --border-color: var(--light-gray);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            --shadow-hover: 0 12px 48px rgba(0, 0, 0, 0.12);
+            --gradient: linear-gradient(135deg, var(--white) 0%, var(--light-gray) 100%);
+        }
+
+        [data-theme="dark"] {
+            --pure-white: #000000;
+            --white: #121212;
+            --light-gray: #1e1e1e;
+            --gray: #2d2d2d;
+            --dark-gray: #3d3d3d;
+            --darker-gray: #4d4d4d;
+            --black: #ffffff;
+            --pure-black: #ffffff;
+            --accent: #a0a0a0;
+
+            --card-bg: var(--white);
+            --text-primary: var(--pure-black);
+            --text-secondary: var(--black);
+            --border-color: var(--dark-gray);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            --shadow-hover: 0 12px 48px rgba(0, 0, 0, 0.4);
+            --gradient: linear-gradient(135deg, var(--white) 0%, var(--light-gray) 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--gradient);
+            min-height: 100vh;
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+            transition: all 0.3s ease;
+        }
+
+        /* Custom Cursor */
+        .cursor {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--accent);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            mix-blend-mode: difference;
+            transition: transform 0.1s ease;
+        }
+
+        .cursor-follower {
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9998;
+            transition: transform 0.15s ease;
+        }
+
+        /* Navigation */
+        .navbar {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            padding: 1.2rem 2rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-brand {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            font-size: 0.95rem;
+            white-space: nowrap;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--text-primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .theme-toggle {
+            background: var(--light-gray);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 0.6rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle:hover {
+            background: var(--gray);
+            transform: rotate(180deg);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 80px auto 0;
+            padding: 0 2rem;
+        }
+
+        /* Header Styles */
+        .header {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 3rem;
+            margin: 2rem 0;
+            box-shadow: var(--shadow);
+            transform: translateY(0);
+            transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        .header:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .project-showcase {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        .project-info h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+            line-height: 1.2;
+        }
+
+        .project-info .tagline {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .project-highlights {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .highlight {
+            background: var(--light-gray);
+            color: var(--text-primary);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .highlight:hover {
+            background: var(--gray);
+            transform: translateY(-1px);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .github-btn, .predictor-btn {
+            background: var(--text-primary);
+            color: var(--card-bg);
+            padding: 0.875rem 1.5rem;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            border: 2px solid var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .github-btn:hover, .predictor-btn:hover {
+            background: transparent;
+            color: var(--text-primary);
+            transform: translateY(-2px);
+        }
+
+        .predictor-btn {
+            background: transparent;
+            color: var(--text-primary);
+            border-color: var(--text-primary);
+        }
+
+        .predictor-btn:hover {
+            background: var(--text-primary);
+            color: var(--card-bg);
+        }
+
+        .profile-display {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .profile-photo {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid var(--text-primary);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            background: var(--light-gray);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .profile-photo:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+        }
+
+        .profile-photo i {
+            font-size: 3rem;
+            color: var(--text-primary);
+        }
+
+        .profile-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .profile-role {
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        /* Sections Common Styles */
+        .section {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 3rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        .section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section:hover {
+            box-shadow: var(--shadow-hover);
+        }
+
+        .section h2 {
+            font-size: 2rem;
+            color: var(--text-primary);
+            margin-bottom: 3rem;
+            text-align: center;
+            position: relative;
+            font-weight: 700;
+        }
+
+        .section h2::after {
+            content: '';
+            position: absolute;
+            bottom: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: var(--text-primary);
+            border-radius: 2px;
+        }
+
+        /* Model Metrics */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .metric-card {
+            background: var(--light-gray);
+            color: var(--text-primary);
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--text-primary);
+        }
+
+        .metric-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            background: var(--white);
+        }
+
+        .metric-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .metric-details p {
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .metric-value {
+            font-weight: 600;
+            color: var(--text-primary);
+            background: var(--gray);
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        /* Classification Metrics - Fixed for both themes */
+        .classification-metrics {
+            background: var(--darker-gray);
+            color: var(--pure-white);
+        }
+
+        .classification-metrics .metric-value {
+            background: var(--accent);
+            color: var(--pure-white);
+        }
+
+        .classification-metrics:hover {
+            background: var(--dark-gray);
+        }
+
+        [data-theme="light"] .classification-metrics {
+            background: var(--darker-gray);
+            color: var(--pure-white);
+        }
+
+        [data-theme="light"] .classification-metrics:hover {
+            background: var(--dark-gray);
+        }
+
+        [data-theme="dark"] .classification-metrics {
+            background: var(--gray);
+            color: var(--pure-black);
+        }
+
+        [data-theme="dark"] .classification-metrics:hover {
+            background: var(--light-gray);
+        }
+
+        [data-theme="dark"] .classification-metrics .metric-value {
+            background: var(--dark-gray);
+            color: var(--pure-white);
+        }
+
+        .classification-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .class-metric {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        [data-theme="dark"] .class-metric {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .class-metric .value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--pure-white);
+            margin-bottom: 0.5rem;
+        }
+
+        [data-theme="dark"] .class-metric .value {
+            color: var(--pure-black);
+        }
+
+        .class-metric .label {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        /* Form Styles */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 1rem 1.25rem;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            background: var(--card-bg);
+            color: var(--text-primary);
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--text-primary);
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .prediction-type {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .prediction-option {
+            background: var(--light-gray);
+            padding: 2rem;
+            border-radius: 14px;
+            border: 2px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            color: var(--text-primary);
+        }
+
+        .prediction-option.selected {
+            border-color: var(--text-primary);
+            background: var(--white);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .prediction-option i {
+            font-size: 2rem;
+            color: var(--text-primary);
+            margin-bottom: 1rem;
+        }
+
+        .predict-btn {
+            background: var(--text-primary);
+            color: var(--card-bg);
+            border: none;
+            padding: 1.125rem 2.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin: 0 auto;
+            width: 200px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .predict-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Result Section */
+        .result-card {
+            background: var(--light-gray);
+            color: var(--text-primary);
+            padding: 3rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            max-width: 450px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .result-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--text-primary);
+        }
+
+        .result-icon {
+            font-size: 3rem;
+        }
+
+        .result-content h3 {
+            font-size: 2.25rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .result-content p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .classification-result {
+            background: var(--darker-gray);
+            color: var(--pure-white);
+        }
+
+        [data-theme="dark"] .classification-result {
+            background: var(--gray);
+            color: var(--pure-black);
+        }
+
+        /* Contact Section */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+        }
+
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: var(--light-gray);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .contact-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            background: var(--white);
+        }
+
+        .contact-item i {
+            font-size: 1.25rem;
+            color: var(--text-primary);
+        }
+
+        .contact-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            padding: 3rem 0;
+            margin-top: 4rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .footer-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .footer-link:hover {
+            color: var(--text-primary);
+        }
+
+        .copyright {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .loading-spinner {
+            border: 3px solid var(--border-color);
+            border-radius: 50%;
+            border-top: 3px solid var(--text-primary);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Scroll to Top Button */
+        .scroll-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--text-primary);
+            color: var(--card-bg);
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
+        }
+
+        .scroll-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .scroll-to-top:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 968px) {
+            .project-showcase {
+                grid-template-columns: 1fr;
+                text-align: center;
+                gap: 2rem;
+            }
+
+            .project-highlights {
+                justify-content: center;
+            }
+
+            .action-buttons {
+                justify-content: center;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .prediction-type {
+                grid-template-columns: 1fr;
+            }
+
+            .result-card {
+                flex-direction: column;
+                text-align: center;
+                padding: 2rem;
+                gap: 1.5rem;
+            }
+
+            .contact-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                gap: 1.5rem;
+                text-align: center;
+            }
+
+            .nav-links {
+                gap: 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 1rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
+            }
+
+            .container {
+                padding: 0 1rem;
+            }
+
+            .header, .section {
+                padding: 2rem 1.5rem;
+                margin: 1.5rem 0;
+            }
+
+            .project-info h1 {
+                font-size: 2rem;
+            }
+
+            .profile-photo {
+                width: 120px;
+                height: 120px;
+            }
+
+            .section h2 {
+                font-size: 1.75rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .github-btn, .predictor-btn {
+                width: 100%;
+                max-width: 280px;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-links {
+                gap: 0.8rem;
+            }
+
+            .nav-brand {
+                font-size: 1.2rem;
+            }
+
+            .project-info h1 {
+                font-size: 1.75rem;
+            }
+
+            .project-info .tagline {
+                font-size: 1.1rem;
+            }
+
+            .header, .section {
+                padding: 1.5rem 1rem;
+            }
+
+            .nav-link {
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Disable right-click and inspect element */
+        body {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Perfect alignment utilities */
+        .text-center { text-align: center; }
+        .text-left { text-align: left; }
+        .text-right { text-align: right; }
+        .flex { display: flex; }
+        .flex-center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .flex-between {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .grid { display: grid; }
+        .grid-center {
+            display: grid;
+            place-items: center;
+        }
+    </style>
 </head>
 <body>
+    <!-- Custom Cursor -->
+    <div class="cursor"></div>
+    <div class="cursor-follower"></div>
 
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="nav-brand">
+                <i class="fas fa-car"></i>
+                Car Price Prediction
+            </a>
+            <div class="nav-links">
+                <a href="#" class="nav-link">Home</a>
+                <a href="#predictor" class="nav-link">Predict</a>
+                <a href="https://www.linkedin.com/in/swarnarajuvemula/" class="nav-link" target="_blank">LinkedIn</a>
+                <a href="https://drive.google.com/file/d/14IvMyUuWBF5h2Jq7mU1-N3mGKoUGn3ET/view?usp=sharing" class="nav-link" target="_blank">Resume</a>
+                <a href="#" class="nav-link" id="blogLink">Blog</a>
+                <a href="#contact" class="nav-link">Contact</a>
+                <button class="theme-toggle" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Scroll to Top Button -->
+    <div class="scroll-to-top" id="scrollToTop">
+        <i class="fas fa-chevron-up"></i>
+    </div>
+
+    <div class="container">
+        <!-- Header with Project Showcase -->
+        <header class="header">
+            <div class="project-showcase">
+                <div class="project-info">
+                    <h1>AutoValue Pro</h1>
+                    <p class="tagline">Intelligent Car Price Prediction & Classification</p>
+                    <div class="project-highlights">
+                        <div class="highlight">Machine Learning</div>
+                        <div class="highlight">Price Prediction</div>
+                        <div class="highlight">Price Classification</div>
+                        <div class="highlight">Real-time Analysis</div>
+                    </div>
+                    <div class="action-buttons">
+                        <a href="https://github.com/MrSwarnaRajuVemula/CarPricePrediction" class="github-btn" target="_blank">
+                            <i class="fab fa-github"></i>
+                            View Repository
+                        </a>
+                        <a href="#predictor" class="predictor-btn">
+                            <i class="fas fa-rocket"></i>
+                            Try Predictor
+                        </a>
+                    </div>
+                </div>
+                <div class="profile-display">
+                    <div class="profile-photo">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <div class="profile-name">Swarna Raju Vemula</div>
+                    <div class="profile-role">Data Science Enthusiast</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Model Performance Section -->
+        <section class="section" id="metrics">
+            <h2>Model Performance</h2>
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <h3>Lasso Regressor</h3>
+                    <div class="metric-details">
+                        <p>R² Score: <span class="metric-value">0.8149</span></p>
+                        <p>RMSE: <span class="metric-value">352,557</span></p>
+                        <p>Adjusted R²: <span class="metric-value">0.8045</span></p>
+                        <p>Cross-Validation: <span class="metric-value">276.65B MSE</span></p>
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <h3>Linear Regressor</h3>
+                    <div class="metric-details">
+                        <p>R² Score: <span class="metric-value">0.6741</span></p>
+                        <p>RMSE: <span class="metric-value">524,690</span></p>
+                        <p>Adjusted R²: <span class="metric-value">0.6559</span></p>
+                        <p>Cross-Validation: <span class="metric-value">238.44B MSE</span></p>
+                    </div>
+                </div>
+                <div class="metric-card">
+                    <h3>Ridge Regressor</h3>
+                    <div class="metric-details">
+                        <p>R² Score: <span class="metric-value">0.8102</span></p>
+                        <p>RMSE: <span class="metric-value">363,865</span></p>
+                        <p>Adjusted R²: <span class="metric-value">0.7996</span></p>
+                        <p>Cross-Validation: <span class="metric-value">259.84B MSE</span></p>
+                    </div>
+                </div>
+                <div class="metric-card classification-metrics">
+                    <h3>Logistic Regression</h3>
+                    <div class="metric-details">
+                        <p>Accuracy: <span class="metric-value">94%</span></p>
+                        <p>Precision: <span class="metric-value">94%</span></p>
+                        <p>Recall: <span class="metric-value">94%</span></p>
+                        <p>F1-Score: <span class="metric-value">94%</span></p>
+                    </div>
+                    <div class="classification-grid">
+                        <div class="class-metric">
+                            <div class="value">94%</div>
+                            <div class="label">Class 0 Precision</div>
+                        </div>
+                        <div class="class-metric">
+                            <div class="value">94%</div>
+                            <div class="label">Class 1 Precision</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Prediction Interface -->
+        <section class="section" id="predictor">
+            <h2>Car Valuation Analysis</h2>
+
+            <!-- Prediction Type Selection -->
+            <div class="prediction-type">
+                <div class="prediction-option selected" id="regressionOption">
+                    <i class="fas fa-chart-line"></i>
+                    <h4>Price Prediction</h4>
+                    <p>Get exact price estimation using regression models</p>
+                </div>
+                <div class="prediction-option" id="classificationOption">
+                    <i class="fas fa-sort-amount-up"></i>
+                    <h4>Price Classification</h4>
+                    <p>Classify as High or Low price using logistic regression</p>
+                </div>
+            </div>
+
+            <form id="predictionForm" class="prediction-form">
+                <div class="form-grid">
+                    <!-- Basic Information -->
+                    <div class="form-group">
+                        <label for="brand"><i class="fas fa-tag"></i> Brand</label>
+                        <input type="text" id="brand" name="brand" required placeholder="e.g., Toyota, Honda">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="model"><i class="fas fa-car"></i> Model</label>
+                        <input type="text" id="model" name="model" required placeholder="e.g., Camry, Civic">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="vehicle_age"><i class="fas fa-calendar-alt"></i> Vehicle Age</label>
+                        <input type="number" id="vehicle_age" name="vehicle_age" required min="0" max="50" placeholder="Years">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="km_driven"><i class="fas fa-tachometer-alt"></i> Kilometers Driven</label>
+                        <input type="number" id="km_driven" name="km_driven" required min="0" placeholder="e.g., 45000">
+                    </div>
+
+                    <!-- Seller and Fuel Type -->
+                    <div class="form-group">
+                        <label for="seller_type"><i class="fas fa-user-tie"></i> Seller Type</label>
+                        <select id="seller_type" name="seller_type" required>
+                            <option value="">Select Seller Type</option>
+                            <option value="dealer">Authorized Dealer</option>
+                            <option value="individual">Individual Owner</option>
+                            <option value="trustmark">Certified Pre-owned</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fuel_type"><i class="fas fa-gas-pump"></i> Fuel Type</label>
+                        <select id="fuel_type" name="fuel_type" required>
+                            <option value="">Select Fuel Type</option>
+                            <option value="petrol">Petrol</option>
+                            <option value="diesel">Diesel</option>
+                            <option value="cng">CNG</option>
+                            <option value="electric">Electric</option>
+                        </select>
+                    </div>
+
+                    <!-- Transmission and Specifications -->
+                    <div class="form-group">
+                        <label for="transmission_type"><i class="fas fa-cogs"></i> Transmission</label>
+                        <select id="transmission_type" name="transmission_type" required>
+                            <option value="">Select Transmission</option>
+                            <option value="manual">Manual</option>
+                            <option value="automatic">Automatic</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mileage"><i class="fas fa-road"></i> Mileage</label>
+                        <input type="number" id="mileage" name="mileage" required step="0.1" min="0" placeholder="kmpl">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="engine"><i class="fas fa-cog"></i> Engine</label>
+                        <input type="number" id="engine" name="engine" required min="0" placeholder="CC">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="max_power"><i class="fas fa-bolt"></i> Max Power</label>
+                        <input type="number" id="max_power" name="max_power" required step="0.1" min="0" placeholder="bhp">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="seats"><i class="fas fa-users"></i> Seats</label>
+                        <input type="number" id="seats" name="seats" required min="2" max="10" placeholder="Number">
+                    </div>
+
+                    <!-- Model Selection -->
+                    <div class="form-group full-width" id="modelSelection">
+                        <label for="model_type"><i class="fas fa-robot"></i> Prediction Model</label>
+                        <select id="model_type" name="model_type" required>
+                            <option value="lasso">Lasso Regressor (Recommended)</option>
+                            <option value="linear">Linear Regressor</option>
+                            <option value="ridge">Ridge Regressor</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="loading" id="loadingIndicator">
+                    <div class="loading-spinner"></div>
+                    <p id="loadingText">Analyzing vehicle data...</p>
+                </div>
+
+                <button type="submit" class="predict-btn" id="predictButton">
+                    <i class="fas fa-chart-line"></i>
+                    <span id="buttonText">Predict Price</span>
+                </button>
+            </form>
+        </section>
+
+        <!-- Result Section -->
+        <section class="section" id="resultSection">
+            <h2 id="resultTitle">Prediction Result</h2>
+            <div class="result-card" id="resultCard">
+                <div class="result-icon">
+                    <i class="fas fa-rupee-sign"></i>
+                </div>
+                <div class="result-content">
+                    <h3 id="predictedPrice">-</h3>
+                    <p id="modelUsed">Model: -</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section class="section" id="contact">
+            <h2>Get In Touch</h2>
+            <div class="contact-grid">
+                <div class="contact-info">
+                    <a href="https://github.com/MrSwarnaRajuVemula" class="contact-item" target="_blank">
+                        <i class="fab fa-github"></i>
+                        <div>
+                            <strong>GitHub</strong>
+                            <div>@MrSwarnaRajuVemula</div>
+                        </div>
+                    </a>
+                    <a href="https://www.linkedin.com/in/swarnarajuvemula/" class="contact-item" target="_blank">
+                        <i class="fab fa-linkedin"></i>
+                        <div>
+                            <strong>LinkedIn</strong>
+                            <div>Swarna Raju Vemula</div>
+                        </div>
+                    </a>
+                    <a href="https://www.kaggle.com/swarnarajuvemula" class="contact-item" target="_blank">
+                        <i class="fab fa-kaggle"></i>
+                        <div>
+                            <strong>Kaggle</strong>
+                            <div>@swarnarajuvemula</div>
+                        </div>
+                    </a>
+                    <a href="mailto:2100030852cseh@gmail.com" class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <div>
+                            <strong>Email</strong>
+                            <div>2100030852cseh@gmail.com</div>
+                        </div>
+                    </a>
+                </div>
+                <form class="contact-form" id="contactForm">
+                    <div class="form-group">
+                        <label for="name"><i class="fas fa-user"></i> Your Name</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email"><i class="fas fa-envelope"></i> Your Email</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="message"><i class="fas fa-comment"></i> Message</label>
+                        <textarea id="message" name="message" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="predict-btn">
+                        <i class="fas fa-paper-plane"></i>
+                        Send Message
+                    </button>
+                </form>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="copyright">
+                Swarna Raju Vemula
+            </div>
+            <div class="footer-links">
+                <a href="https://github.com/MrSwarnaRajuVemula" class="footer-link" target="_blank">GitHub</a>
+                <a href="https://www.linkedin.com/in/swarnarajuvemula/" class="footer-link" target="_blank">LinkedIn</a>
+                <a href="https://www.kaggle.com/swarnarajuvemula" class="footer-link" target="_blank">Kaggle</a>
+                <a href="https://drive.google.com/file/d/14IvMyUuWBF5h2Jq7mU1-N3mGKoUGn3ET/view?usp=sharing" class="footer-link" target="_blank">Resume</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Custom Cursor
+        const cursor = document.querySelector('.cursor');
+        const cursorFollower = document.querySelector('.cursor-follower');
+
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+
+            setTimeout(() => {
+                cursorFollower.style.left = e.clientX + 'px';
+                cursorFollower.style.top = e.clientY + 'px';
+            }, 100);
+        });
+
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = themeToggle.querySelector('i');
+
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+
+        // Initialize theme
+        const savedTheme = localStorage.getItem('theme') ||
+                          (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        setTheme(savedTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+        });
+
+        // Blog Link
+        document.getElementById('blogLink').addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('🚧 Blog section is under maintenance. Coming soon!');
+        });
+
+        // Contact Form
+        document.getElementById('contactForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const name = formData.get('name');
+            const email = formData.get('email');
+            const message = formData.get('message');
+
+            const mailtoLink = `mailto:2100030852cseh@gmail.com?subject=Message from ${encodeURIComponent(name)}&body=${encodeURIComponent(message + '\n\nReply to: ' + email)}`;
+            window.location.href = mailtoLink;
+        });
+
+        // Scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        // Observe sections for animation
+        document.querySelectorAll('.section').forEach(section => {
+            observer.observe(section);
+        });
+
+        // Scroll to top functionality
+        const scrollToTopBtn = document.getElementById('scrollToTop');
+
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                scrollToTopBtn.classList.add('visible');
+            } else {
+                scrollToTopBtn.classList.remove('visible');
+            }
+        });
+
+        scrollToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
+        // Prediction type selection
+        const regressionOption = document.getElementById('regressionOption');
+        const classificationOption = document.getElementById('classificationOption');
+        const modelSelection = document.getElementById('modelSelection');
+        const predictButton = document.getElementById('predictButton');
+        const buttonText = document.getElementById('buttonText');
+        const resultTitle = document.getElementById('resultTitle');
+        const resultCard = document.getElementById('resultCard');
+        const loadingText = document.getElementById('loadingText');
+
+        let predictionType = 'regression';
+
+        regressionOption.addEventListener('click', () => {
+            predictionType = 'regression';
+            regressionOption.classList.add('selected');
+            classificationOption.classList.remove('selected');
+            modelSelection.style.display = 'flex';
+            buttonText.textContent = 'Predict Price';
+            resultTitle.textContent = 'Price Prediction Result';
+            resultCard.className = 'result-card';
+        });
+
+        classificationOption.addEventListener('click', () => {
+            predictionType = 'classification';
+            classificationOption.classList.add('selected');
+            regressionOption.classList.remove('selected');
+            modelSelection.style.display = 'none';
+            buttonText.textContent = 'Classify Price';
+            resultTitle.textContent = 'Price Classification Result';
+            resultCard.className = 'result-card classification-result';
+        });
+
+        // Disable right-click context menu
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        // Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+        document.addEventListener('keydown', function(e) {
+            if (
+                e.key === 'F12' ||
+                (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+                (e.ctrlKey && e.shiftKey && e.key === 'J') ||
+                (e.ctrlKey && e.key === 'U')
+            ) {
+                e.preventDefault();
+            }
+        });
+
+        // Form submission handler
+        document.getElementById('predictionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Show loading indicator
+            document.getElementById('loadingIndicator').style.display = 'block';
+            document.getElementById('resultSection').classList.remove('visible');
+
+            // Update loading text based on prediction type
+            loadingText.textContent = predictionType === 'regression'
+                ? 'Analyzing vehicle data and predicting optimal price...'
+                : 'Classifying price category using logistic regression...';
+
+            // Get form data
+            const formData = new FormData(this);
+            formData.append('prediction_type', predictionType);
+
+            // Send prediction request
+            fetch('/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Hide loading indicator
+                document.getElementById('loadingIndicator').style.display = 'none';
+
+                if (data.success) {
+                    // Display results
+                    if (predictionType === 'regression') {
+                        document.getElementById('predictedPrice').textContent = data.predicted_price;
+                        document.getElementById('modelUsed').textContent = `Model: ${data.model_used}`;
+                        document.getElementById('resultCard').querySelector('.result-icon').className = 'result-icon';
+                        document.getElementById('resultCard').querySelector('.result-icon').innerHTML = '<i class="fas fa-rupee-sign"></i>';
+                    } else {
+                        const isHighPrice = data.predicted_class === '1';
+                        document.getElementById('predictedPrice').textContent = isHighPrice ? 'HIGH PRICE' : 'LOW PRICE';
+                        document.getElementById('modelUsed').textContent = `Confidence: ${data.confidence}%`;
+                        document.getElementById('resultCard').querySelector('.result-icon').className = 'result-icon';
+                        document.getElementById('resultCard').querySelector('.result-icon').innerHTML =
+                            isHighPrice ? '<i class="fas fa-arrow-up"></i>' : '<i class="fas fa-arrow-down"></i>';
+                    }
+
+                    document.getElementById('resultSection').classList.add('visible');
+
+                    // Scroll to results
+                    document.getElementById('resultSection').scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                // Hide loading indicator
+                document.getElementById('loadingIndicator').style.display = 'none';
+                console.error('Error:', error);
+                alert('An error occurred while processing your request. Please try again.');
+            });
+        });
+
+        // Add hover effects to all interactive elements
+        document.querySelectorAll('.metric-card, .prediction-option, .predict-btn, .contact-item, .github-btn, .highlight, .predictor-btn').forEach(element => {
+            element.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px)';
+            });
+
+            element.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
 </body>
 </html>
