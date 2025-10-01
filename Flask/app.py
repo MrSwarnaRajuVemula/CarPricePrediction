@@ -12,7 +12,7 @@ app = Flask(__name__)
 # Disable inspect element (client-side protection)
 @app.after_request
 def after_request(response):
-    response.headers.add('Cache-Control', 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0')
+    response.headers.add('Cache-Control', 'no-store, no-cache, must-revalidate, post-check=0, pre-check-0')
     response.headers.add('Pragma', 'no-cache')
     response.headers.add('Expires', '0')
     return response
@@ -36,7 +36,6 @@ class CarPricePredictor:
             # Check if models directory exists
             if not os.path.exists(models_dir):
                 print(f"❌ Models directory not found: {models_dir}")
-                # List current directory contents for debugging
                 current_dir = os.listdir(base_dir)
                 print(f"📂 Current directory contents: {current_dir}")
                 raise FileNotFoundError("Models directory not found")
@@ -67,35 +66,28 @@ class CarPricePredictor:
         except Exception as e:
             print(f"❌ Error loading models: {e}")
             print(traceback.format_exc())
-            # Fallback to mock models
+            # Fallback to simple mock models
             self.models = {
-                'lasso': self.lasso_predict,
-                'linear': self.linear_predict,
-                'ridge': self.ridge_predict,
+                'lasso': self.mock_predict,
+                'linear': self.mock_predict,
+                'ridge': self.mock_predict,
                 'logistic': self.logistic_predict
             }
             print("⚠️ Using mock models as fallback")
 
-    def lasso_predict(self, features):
-        # Mock prediction fallback
-        base_price = 500000
-        price = base_price - (features.get('vehicle_age', 0) * 50000) + (features.get('max_power', 0) * 1000)
-        return max(price, 100000)
+    def mock_predict(self, features):
+        """Simple mock prediction when real models fail to load"""
+        # Simple calculation without arbitrary base prices
+        vehicle_age = features.get('vehicle_age', 0)
+        max_power = features.get('max_power', 0)
+        km_driven = features.get('km_driven', 0)
 
-    def linear_predict(self, features):
-        # Mock prediction fallback
-        base_price = 450000
-        price = base_price - (features.get('vehicle_age', 0) * 45000) + (features.get('max_power', 0) * 900)
-        return max(price, 100000)
-
-    def ridge_predict(self, features):
-        # Mock prediction fallback
-        base_price = 480000
-        price = base_price - (features.get('vehicle_age', 0) * 47000) + (features.get('max_power', 0) * 950)
-        return max(price, 100000)
+        # Simple mock calculation
+        price = (max_power * 1000) - (vehicle_age * 20000) - (km_driven * 0.5)
+        return max(price, 50000)  # Minimum reasonable price for mock data
 
     def logistic_predict(self, features):
-        # Mock classification - returns probability and class
+        """Mock classification prediction"""
         probability = 0.75  # Mock probability
         predicted_class = 1 if probability > 0.5 else 0
         confidence = int(probability * 100)
@@ -113,7 +105,6 @@ class CarPricePredictor:
         for feature in numerical_features:
             try:
                 value = form_data.get(feature, '0')
-                # Handle empty strings
                 if value == '':
                     value = '0'
                 features[feature] = float(value)
@@ -122,7 +113,7 @@ class CarPricePredictor:
                 print(f"❌ Error converting {feature}: {e}")
                 features[feature] = 0.0
 
-        # Categorical features - store but use simple encoding
+        # Categorical features
         categorical_features = ['brand', 'model', 'seller_type', 'fuel_type', 'transmission_type']
         for feature in categorical_features:
             features[feature] = form_data.get(feature, 'unknown').lower()
@@ -132,16 +123,8 @@ class CarPricePredictor:
         return features
 
     def create_feature_array(self, features):
-        """Convert features to numpy array - COMPATIBLE VERSION"""
+        """Convert features to numpy array"""
         print("🔧 Creating feature array...")
-
-        # Use consistent feature order that matches your model training
-        # This should match the order used when you trained the models
-        feature_order = [
-            'vehicle_age', 'km_driven', 'mileage', 'engine', 'max_power', 'seats',
-            # Categorical features encoded as numerical
-            'brand_encoded', 'model_encoded', 'seller_encoded', 'fuel_encoded', 'transmission_encoded'
-        ]
 
         feature_array = []
 
@@ -152,13 +135,12 @@ class CarPricePredictor:
             print(f"  Numerical {feature}: {features.get(feature, 0)}")
 
         # Simple encoding for categorical features
-        # In production, use the same encoding as during training
         categorical_mapping = {
             'brand': {'unknown': 0, 'maruti': 1, 'hyundai': 2, 'honda': 3, 'toyota': 4, 'ford': 5},
             'fuel_type': {'unknown': 0, 'petrol': 1, 'diesel': 2, 'cng': 3, 'electric': 4},
             'seller_type': {'unknown': 0, 'individual': 1, 'dealer': 2, 'trustmark': 3},
             'transmission_type': {'unknown': 0, 'manual': 1, 'automatic': 2},
-            'model': {'unknown': 0}  # Simple model encoding
+            'model': {'unknown': 0}
         }
 
         # Encode categorical features
@@ -195,12 +177,11 @@ class CarPricePredictor:
         if callable(model) and not hasattr(model, 'predict'):
             print(f"🔄 Using mock prediction for {model_name}")
             if model_name == 'logistic' or prediction_type == 'classification':
-                predicted_class, confidence = self.logistic_predict(features)
-                return predicted_class, confidence
+                return self.logistic_predict(features)
             else:
                 return model(features)
         else:
-            # It's an actual scikit-learn model
+            # It's an actual scikit-learn model - return raw prediction
             try:
                 feature_array = self.create_feature_array(features)
                 print(f"🔧 Feature array prepared for model input")
@@ -215,26 +196,24 @@ class CarPricePredictor:
                         print(f"✅ Classification result: class={predicted_class}, confidence={confidence}%")
                         return predicted_class, confidence
                     else:
-                        # Fallback for models without predict_proba
                         predicted_class = model.predict(feature_array)[0]
                         print(f"✅ Classification result: class={predicted_class}")
-                        return predicted_class, 80  # Default confidence
+                        return predicted_class, 80
                 else:
-                    # Regression prediction
+                    # Regression prediction - RETURN RAW PREDICTION
                     print("📈 Running regression prediction...")
                     prediction = model.predict(feature_array)[0]
-                    print(f"✅ Regression prediction: {prediction}")
-                    return max(float(prediction), 100000)  # Ensure minimum price
+                    print(f"✅ Raw regression prediction: {prediction}")
+                    return float(prediction)  # No modifications
 
             except Exception as e:
                 print(f"❌ Error in model prediction: {e}")
                 print(traceback.format_exc())
-                # Fallback to mock prediction
                 print("🔄 Falling back to mock prediction")
                 if model_name == 'logistic' or prediction_type == 'classification':
                     return self.logistic_predict(features)
                 else:
-                    return getattr(self, f'{model_name}_predict')(features)
+                    return self.mock_predict(features)
 
 
 # Initialize predictor
@@ -282,12 +261,13 @@ def predict():
             print("📈 Running regression...")
             predicted_price = predictor.predict(selected_model, features, 'regression')
 
-            # Format the price
+            # Format the price without modifying the prediction
             formatted_price = "₹{:,.2f}".format(predicted_price)
 
             result = {
                 'success': True,
                 'predicted_price': formatted_price,
+                'raw_predicted_price': predicted_price,
                 'model_used': selected_model.upper()
             }
             print(f"✅ Regression result: {result}")
